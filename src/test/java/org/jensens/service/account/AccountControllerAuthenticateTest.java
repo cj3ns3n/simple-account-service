@@ -33,7 +33,7 @@ public class AccountControllerAuthenticateTest {
     public void GoodPasswordAuthenticate() throws Exception {
         MvcResult result = this.mockMvc.perform(post("/v1/accounts/authenticate")
                 .param("id", "1337")
-                .param("password", "password"))
+                .param("password", "XXXHHHXXX"))
                     .andDo(print()).andExpect(status().isOk()).andReturn();
 
         Assert.assertEquals("true", result.getResponse().getContentAsString());
@@ -43,9 +43,19 @@ public class AccountControllerAuthenticateTest {
     public void BadPasswordAuthenticate() throws Exception {
         MvcResult result = this.mockMvc.perform(post("/v1/accounts/authenticate")
                 .param("id", "1337")
-                .param("password", "password"))
+                .param("password", "wrongpassword"))
                 .andDo(print()).andExpect(status().isOk()).andReturn();
 
-        Assert.assertEquals("true", result.getResponse().getContentAsString());
+        Assert.assertEquals("false", result.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void EmptyPasswordAuthenticate() throws Exception {
+        MvcResult result = this.mockMvc.perform(post("/v1/accounts/authenticate")
+                .param("id", "1337")
+                .param("password", ""))
+                .andDo(print()).andExpect(status().isOk()).andReturn();
+
+        Assert.assertEquals("false", result.getResponse().getContentAsString());
     }
 }
