@@ -30,8 +30,20 @@ public class AccountControllerAuthenticateTest {
     }
 
     @Test
-    public void AccountIdAuthenticateShouldReturnTrue() throws Exception {
-        MvcResult result = this.mockMvc.perform(get("/v1/accounts/authenticate").param("id", "1337"))
+    public void GoodPasswordAuthenticate() throws Exception {
+        MvcResult result = this.mockMvc.perform(post("/v1/accounts/authenticate")
+                .param("id", "1337")
+                .param("password", "password"))
+                    .andDo(print()).andExpect(status().isOk()).andReturn();
+
+        Assert.assertEquals("true", result.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void BadPasswordAuthenticate() throws Exception {
+        MvcResult result = this.mockMvc.perform(post("/v1/accounts/authenticate")
+                .param("id", "1337")
+                .param("password", "password"))
                 .andDo(print()).andExpect(status().isOk()).andReturn();
 
         Assert.assertEquals("true", result.getResponse().getContentAsString());

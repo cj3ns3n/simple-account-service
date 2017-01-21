@@ -12,11 +12,17 @@ import java.util.List;
 public class AccountController {
     private AccessorInMemory accessor = new AccessorInMemory();
 
-    @RequestMapping(value = "v1/accounts/authenticate", method = RequestMethod.GET)
-    public boolean authenticate(@RequestParam(value="id") long accountId) {
+    @RequestMapping(value = "v1/accounts/authenticate", method = RequestMethod.POST)
+    public boolean authenticate(@RequestParam(value="id") long accountId, @RequestParam(value="password") String password) {
         try {
             Account account = accessor.getAccount(accountId);
-            return true;
+
+            if (account.passwordHash.equals(hashPassword(password))) {
+                return true;
+            }
+            else {
+                return false;
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
