@@ -1,6 +1,8 @@
 package org.jensens.auth.storage;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AccessorInMemory {
     private Connection conn;
@@ -61,14 +63,35 @@ public class AccessorInMemory {
         Statement createStatement = conn.createStatement();
         ResultSet acctResult = createStatement.executeQuery(selectStmtStr);
         if (acctResult.next()) {
-            account = new Account();
-            account.id = acctResult.getLong("ID");
-            account.firstName = acctResult.getString("FIRST_NAME");
-            account.lastName = acctResult.getString("LAST_NAME");
-            account.loginName = acctResult.getString("LOGIN_NAME");
-            account.passwordHash = acctResult.getString("PASSWORD_HASH");
+            account = toAccount(acctResult);
         }
         createStatement.close();
+
+        return account;
+    }
+
+    public List<Account> getAccounts(long limit) throws SQLException {
+        String selectStmtStr = String.format("SELECT * FROM %s", ACCOUNT_TABLE);
+        List<Account> accounts = new ArrayList<Account>();
+        long count = 0;
+
+        Statement createStatement = conn.createStatement();
+        ResultSet acctResult = createStatement.executeQuery(selectStmtStr);
+        while (acctResult.next() && count < limit) {
+            accounts.add(toAccount(acctResult));
+            count++;
+        }
+
+        return accounts;
+    }
+
+    private Account toAccount(ResultSet acctResult) throws SQLException {
+        Account account = new Account();
+        account.id = acctResult.getLong("ID");
+        account.firstName = acctResult.getString("FIRST_NAME");
+        account.lastName = acctResult.getString("LAST_NAME");
+        account.loginName = acctResult.getString("LOGIN_NAME");
+        account.passwordHash = acctResult.getString("PASSWORD_HASH");
 
         return account;
     }

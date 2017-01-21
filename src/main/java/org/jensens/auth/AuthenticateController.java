@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 public class AuthenticateController {
@@ -24,7 +26,27 @@ public class AuthenticateController {
         }
     }
 
-    @RequestMapping(value = "v1/create", method = RequestMethod.POST)
+    @RequestMapping(value = "v1/list", method = RequestMethod.GET)
+    public List<Account> create(@RequestParam(value="limit", required=false) String limitStr) {
+        long limit = Long.MAX_VALUE;
+
+        if (limitStr != null) {
+            try {
+                limit = Long.parseLong(limitStr);
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
+        }
+        
+        try {
+            return accessor.getAccounts(limit);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return new ArrayList<Account>();
+        }
+    }
+
+                       @RequestMapping(value = "v1/create", method = RequestMethod.POST)
     public long create(@RequestParam(value="loginName") String loginName,
                           @RequestParam(value="firstName") String firstName,
                           @RequestParam(value="lastName") String lastName,
