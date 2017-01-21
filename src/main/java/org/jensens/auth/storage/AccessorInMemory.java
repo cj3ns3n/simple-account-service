@@ -1,5 +1,7 @@
 package org.jensens.auth.storage;
 
-public interface Accessor {
-    Account getAccount(long accountId);
+public class AccessorInMemory {
+    public Account getAccount(long accountId) {
+        return null;
+    }
 }
