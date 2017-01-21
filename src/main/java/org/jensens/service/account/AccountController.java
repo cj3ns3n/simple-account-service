@@ -15,7 +15,7 @@ import java.util.List;
 public class AccountController {
     private AccessorInMemory accessor = new AccessorInMemory();
 
-    @RequestMapping("v1/accounts/authenticate")
+    @RequestMapping(value = "v1/accounts/authenticate", method = RequestMethod.GET)
     public boolean authenticate(@RequestParam(value="id") long accountId) {
         try {
             Account account = accessor.getAccount(accountId);
@@ -23,6 +23,16 @@ public class AccountController {
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    @RequestMapping(value = "v1/accounts/{id}", method = RequestMethod.GET)
+    public Account getAccount(@RequestParam(value="id") long accountId) {
+        try {
+            return accessor.getAccount(accountId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
@@ -45,6 +55,7 @@ public class AccountController {
             return new ArrayList<Account>();
         }
     }
+
 
     @RequestMapping(value = "v1/accounts/create", method = RequestMethod.POST)
     public long create(@RequestParam(value="loginName") String loginName,
