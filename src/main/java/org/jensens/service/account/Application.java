@@ -1,4 +1,4 @@
-package org.jensens.auth;
+package org.jensens.service.account;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

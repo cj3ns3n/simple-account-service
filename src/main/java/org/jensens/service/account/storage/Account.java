@@ -1,4 +1,4 @@
-package org.jensens.auth.storage;
+package org.jensens.service.account.storage;
 
 public class Account {
     public String firstName;

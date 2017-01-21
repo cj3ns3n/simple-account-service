@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.jensens</groupId>
-    <artifactId>simple-auth</artifactId>
+    <artifactId>simple-account-service</artifactId>
     <version>0.1.0</version>
 
     <parent>

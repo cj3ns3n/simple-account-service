@@ -1,4 +1,4 @@
-package org.jensens.auth.storage;
+package org.jensens.service.account.storage;
 
 import java.sql.*;
 import java.util.ArrayList;

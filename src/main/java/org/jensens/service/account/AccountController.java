@@ -1,7 +1,7 @@
-package org.jensens.auth;
+package org.jensens.service.account;
 
-import org.jensens.auth.storage.AccessorInMemory;
-import org.jensens.auth.storage.Account;
+import org.jensens.service.account.storage.AccessorInMemory;
+import org.jensens.service.account.storage.Account;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -12,10 +12,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-public class AuthenticateController {
+public class AccountController {
     private AccessorInMemory accessor = new AccessorInMemory();
 
-    @RequestMapping("v1/authenticate")
+    @RequestMapping("v1/accounts/authenticate")
     public boolean authenticate(@RequestParam(value="id") long accountId) {
         try {
             Account account = accessor.getAccount(accountId);
@@ -26,7 +26,7 @@ public class AuthenticateController {
         }
     }
 
-    @RequestMapping(value = "v1/list", method = RequestMethod.GET)
+    @RequestMapping(value = "v1/accounts/list", method = RequestMethod.GET)
     public List<Account> create(@RequestParam(value="limit", required=false) String limitStr) {
         long limit = Long.MAX_VALUE;
 
@@ -46,7 +46,7 @@ public class AuthenticateController {
         }
     }
 
-                       @RequestMapping(value = "v1/create", method = RequestMethod.POST)
+    @RequestMapping(value = "v1/accounts/create", method = RequestMethod.POST)
     public long create(@RequestParam(value="loginName") String loginName,
                           @RequestParam(value="firstName") String firstName,
                           @RequestParam(value="lastName") String lastName,
