@@ -1,6 +1,7 @@
 package org.jensens.auth;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -38,4 +39,16 @@ public class AuthenticateControllerTest {
         Assert.assertEquals("true", result.getResponse().getContentAsString());
     }
 
+    @Test
+    public void CreateAccountShouldReturnTrue() throws Exception {
+
+        MvcResult result = this.mockMvc.perform((post("/v1/create")
+                .param("loginName", "jdoe")
+                .param("firstName", "John")
+                .param("lastName", "Doe")
+                .param("password", "MyVoiceIsMyPassword")))
+                .andDo(print()).andExpect(status().isOk()).andReturn();
+
+        Assert.assertEquals("1", result.getResponse().getContentAsString());
+    }
 }
