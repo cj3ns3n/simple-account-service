@@ -38,12 +38,11 @@ public class AccountControllerManagementTest {
     }
 
     @Test
-    public void GetAccountShoultReturnTrue() throws Exception {
+    public void GetAccountShouldReturnTrue() throws Exception {
         long accountId = 1337L;
         String urlPath = String.format("/v1/accounts/%d", accountId);
-        
-        MvcResult result = this.mockMvc.perform(get(urlPath)
-                .param("id", String.valueOf(accountId)))
+
+        MvcResult result = this.mockMvc.perform(get(urlPath))
                 .andDo(print()).andExpect(status().isOk()).andReturn();
 
         //Assert.assertEquals("true", result.getResponse().getContentAsString());

@@ -2,10 +2,7 @@ package org.jensens.service.account;
 
 import org.jensens.service.account.storage.AccessorInMemory;
 import org.jensens.service.account.storage.Account;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -27,7 +24,7 @@ public class AccountController {
     }
 
     @RequestMapping(value = "v1/accounts/{id}", method = RequestMethod.GET)
-    public Account getAccount(@RequestParam(value="id") long accountId) {
+    public Account getAccount(@PathVariable(value="id") long accountId) {
         try {
             return accessor.getAccount(accountId);
         } catch (SQLException e) {
