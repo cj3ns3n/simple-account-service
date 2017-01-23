@@ -1,10 +1,13 @@
 package org.jensens.service.account.storage;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Account {
+    public long id;
+    public String loginName;
     public String firstName;
     public String lastName;
-    public String loginName;
-    public long id;
+    @JsonIgnore
     public String passwordHash;
     //public List<String> roles = new ArrayList<String>();
 }
