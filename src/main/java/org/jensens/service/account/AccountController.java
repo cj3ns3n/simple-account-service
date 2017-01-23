@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.jensens.service.account.storage.AccessorInMemory;
 import org.jensens.service.account.storage.Account;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,16 +13,16 @@ import org.springframework.web.bind.annotation.*;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+import javax.servlet.http.HttpServletRequest;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 public class AccountController {
     private AccessorInMemory accessor = new AccessorInMemory();
     private ObjectMapper jsonMapper = new ObjectMapper();
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     private static final String AUTH_SUCCESS_MESSAGE = "{\"status\":\"success\", \"roles\":\"\"";
     private static final String AUTH_FAIL_MESSAGE = "{\"status\":\"fail\"";
@@ -28,20 +30,22 @@ public class AccountController {
     private static final String ADD_SUCCESS_MESSAGE = "{\"status\":\"success\"";
     private static final String ADD_FAIL_MESSAGE = "{\"status\":\"fail\"";
 
+    private static final String TEMP_SALT = "Salty";
+
     @RequestMapping(value = "v1/accounts/authenticate", method = RequestMethod.POST)
-    public ResponseEntity<String> authenticate(@RequestParam(value="id") long accountId, @RequestParam(value="password") String password) {
+    public ResponseEntity<String> authenticate(@RequestParam(value="id") long accountId, @RequestParam(value="password") String password, HttpServletRequest request) {
         try {
             Account account = accessor.getAccount(accountId);
 
             try {
-                if (account.passwordHash.equals(hashPassword(password))) {
+                if (account.passwordHash.equals(hashPassword(password, TEMP_SALT))) {
                     return ResponseEntity.ok(AUTH_SUCCESS_MESSAGE);
                 }
                 else {
                     return ResponseEntity.ok(AUTH_FAIL_MESSAGE);
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (Exception ex) {
+                log.error("Request: " + request.getRequestURL() + " raised " + ex);
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
             }
         } catch (SQLException e) {
@@ -94,7 +98,7 @@ public class AccountController {
         newAccount.firstName = firstName;
         newAccount.lastName = lastName;
         try {
-            newAccount.passwordHash = hashPassword(password);
+            newAccount.passwordHash = hashPassword(password, TEMP_SALT);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
@@ -109,15 +113,16 @@ public class AccountController {
         }
     }
 
-    private String hashPassword(String password) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    private String hashPassword(String password, String salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
         final int iterations = 20*1000;
         final int desiredKeyLen = 256;
-        final byte[] salt = "Basic Salt".getBytes();
 
         SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
         SecretKey key = f.generateSecret(new PBEKeySpec(
-                password.toCharArray(), salt, iterations, desiredKeyLen)
+                password.toCharArray(), salt.getBytes(), iterations, desiredKeyLen)
         );
-        return Base64.encodeBase64String(key.getEncoded());
+
+        String pwdhash = Base64.encodeBase64String(key.getEncoded());
+        return pwdhash;
     }
 }

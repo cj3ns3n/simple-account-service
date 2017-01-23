@@ -23,6 +23,9 @@ public class AccountControllerAuthenticateTest {
     @Autowired
     private MockMvc mockMvc;
 
+    private static final String AUTH_SUCCESS_MESSAGE = "{\"status\":\"success\", \"roles\":\"\"";
+    private static final String AUTH_FAIL_MESSAGE = "{\"status\":\"fail\"";
+
     @Test
     public void noParamAuthenticateShouldReturnFalse() throws Exception {
 
@@ -36,7 +39,7 @@ public class AccountControllerAuthenticateTest {
                 .param("password", "XXXHHHXXX"))
                     .andDo(print()).andExpect(status().isOk()).andReturn();
 
-        Assert.assertEquals("true", result.getResponse().getContentAsString());
+        Assert.assertEquals(AUTH_SUCCESS_MESSAGE, result.getResponse().getContentAsString());
     }
 
     @Test
@@ -46,7 +49,7 @@ public class AccountControllerAuthenticateTest {
                 .param("password", "wrongpassword"))
                 .andDo(print()).andExpect(status().isOk()).andReturn();
 
-        Assert.assertEquals("false", result.getResponse().getContentAsString());
+        Assert.assertEquals(AUTH_FAIL_MESSAGE, result.getResponse().getContentAsString());
     }
 
     @Test
@@ -56,6 +59,6 @@ public class AccountControllerAuthenticateTest {
                 .param("password", ""))
                 .andDo(print()).andExpect(status().isOk()).andReturn();
 
-        Assert.assertEquals("false", result.getResponse().getContentAsString());
+        Assert.assertEquals(AUTH_FAIL_MESSAGE, result.getResponse().getContentAsString());
     }
 }

@@ -52,7 +52,7 @@ public class AccessorInMemory {
         tmpAccount.loginName = "Leet";
         tmpAccount.firstName = "First";
         tmpAccount.lastName = "Last";
-        tmpAccount.passwordHash = "XXXHHHXXX";
+        tmpAccount.passwordHash = "u0OPqibvWGn1ZD61qZxMm1MZ6cO+ichJcLMIXWjYCoY=";
         addAccount(tmpAccount);
     }
 
