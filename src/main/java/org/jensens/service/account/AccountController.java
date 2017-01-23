@@ -1,9 +1,15 @@
 package org.jensens.service.account;
 
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.jensens.service.account.storage.AccessorInMemory;
 import org.jensens.service.account.storage.Account;
 import org.springframework.web.bind.annotation.*;
 
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,10 +23,18 @@ public class AccountController {
         try {
             Account account = accessor.getAccount(accountId);
 
-            if (account.passwordHash.equals(hashPassword(password))) {
-                return true;
-            }
-            else {
+            try {
+                if (account.passwordHash.equals(hashPassword(password))) {
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+                return false;
+            } catch (InvalidKeySpecException e) {
+                e.printStackTrace();
                 return false;
             }
         } catch (SQLException e) {
@@ -69,7 +83,15 @@ public class AccountController {
         newAccount.loginName = loginName;
         newAccount.firstName = firstName;
         newAccount.lastName = lastName;
-        newAccount.passwordHash = hashPassword(password);
+        try {
+            newAccount.passwordHash = hashPassword(password);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return -1;
+        } catch (InvalidKeySpecException e) {
+            e.printStackTrace();
+            return -1;
+        }
 
         try {
             accessor.addAccount(newAccount);
@@ -80,7 +102,15 @@ public class AccountController {
         }
     }
 
-    private String hashPassword(String password) {
-        return password;
+    private String hashPassword(String password) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        final int iterations = 20*1000;
+        final int desiredKeyLen = 256;
+        final byte[] salt = "Basic Salt".getBytes();
+
+        SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+        SecretKey key = f.generateSecret(new PBEKeySpec(
+                password.toCharArray(), salt, iterations, desiredKeyLen)
+        );
+        return Base64.encodeBase64String(key.getEncoded());
     }
 }
