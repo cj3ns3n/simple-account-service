@@ -27,8 +27,8 @@ public class AccountController {
     private static final String AUTH_SUCCESS_MESSAGE = "{\"status\":\"success\", \"roles\":\"\"";
     private static final String AUTH_FAIL_MESSAGE = "{\"status\":\"fail\"";
 
-    private static final String ADD_SUCCESS_MESSAGE = "{\"status\":\"success\"";
-    private static final String ADD_FAIL_MESSAGE = "{\"status\":\"fail\"";
+    private static final String CREATE_SUCCESS_MESSAGE = "{\"status\":\"success\", \"accountId:\"%d";
+    private static final String CREATE_FAIL_MESSAGE = "{\"status\":\"fail\"";
 
     private static final String TEMP_SALT = "Salty";
 
@@ -105,11 +105,11 @@ public class AccountController {
         }
 
         try {
-            accessor.addAccount(newAccount);
-            return ResponseEntity.ok(ADD_SUCCESS_MESSAGE);
+            long accountId = accessor.addAccount(newAccount);
+            return ResponseEntity.ok(String.format(CREATE_SUCCESS_MESSAGE, accountId));
         } catch (SQLException e) {
             e.printStackTrace();
-            return ResponseEntity.ok(ADD_FAIL_MESSAGE);
+            return ResponseEntity.ok(CREATE_FAIL_MESSAGE);
         }
     }
 

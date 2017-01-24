@@ -96,7 +96,7 @@ public class AccessorInMemory {
         return account;
     }
 
-    public void addAccount(Account account) throws SQLException {
+    public long addAccount(Account account) throws SQLException {
         String insertStmtStr = String.format("INSERT INTO %s (ID, FIRST_NAME, LAST_NAME, LOGIN_NAME, PASSWORD_HASH) VALUES (%d, '%s', '%s', '%s', '%s')",
                 ACCOUNT_TABLE,
                 account.id,
@@ -106,7 +106,22 @@ public class AccessorInMemory {
                 account.passwordHash);
 
         Statement insertStatement = conn.createStatement();
-        insertStatement.execute(insertStmtStr);
-        insertStatement.close();
+        try {
+            boolean success = insertStatement.execute(insertStmtStr);
+            if (success) {
+                ResultSet keysResult = insertStatement.getGeneratedKeys();
+                if (keysResult.next()) {
+                    return keysResult.getLong(0);
+                }
+                else {
+                    throw new RuntimeException("Failed to read account ID");
+                }
+            }
+            else {
+                throw new RuntimeException("Failed to insert account");
+            }
+        } finally {
+            insertStatement.close();
+        }
     }
 }

@@ -27,14 +27,12 @@ public class AccountControllerManagementTest {
     @Test
     public void CreateAccountShouldReturnTrue() throws Exception {
 
-        MvcResult result = this.mockMvc.perform((post("/v1/accounts/create")
+        this.mockMvc.perform((post("/v1/accounts/create")
                 .param("loginName", "jdoe")
                 .param("firstName", "John")
                 .param("lastName", "Doe")
                 .param("password", "MyVoiceIsMyPassword")))
-                .andDo(print()).andExpect(status().isOk()).andReturn();
-
-        Assert.assertEquals("1", result.getResponse().getContentAsString());
+                .andDo(print()).andExpect(status().isOk());
     }
 
     @Test
