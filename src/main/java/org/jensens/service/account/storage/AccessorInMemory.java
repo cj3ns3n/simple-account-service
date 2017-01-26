@@ -51,14 +51,6 @@ public class AccessorInMemory {
         finally {
             createStatement.close();
         }
-
-        Account tmpAccount = new Account();
-        tmpAccount.id = 1337L;
-        tmpAccount.loginName = "Leet";
-        tmpAccount.firstName = "First";
-        tmpAccount.lastName = "Last";
-        tmpAccount.passwordHash = "u0OPqibvWGn1ZD61qZxMm1MZ6cO+ichJcLMIXWjYCoY=";
-        addAccount(tmpAccount);
     }
 
     public Account getAccount(long accountId) throws SQLException {
