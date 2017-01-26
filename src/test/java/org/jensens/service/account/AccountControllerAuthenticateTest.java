@@ -1,5 +1,6 @@
 package org.jensens.service.account;
 
+import org.jensens.service.account.storage.Account;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,42 +24,28 @@ public class AccountControllerAuthenticateTest {
     @Autowired
     private MockMvc mockMvc;
 
-    private static final String AUTH_SUCCESS_MESSAGE = "{\"status\":\"success\", \"roles\":\"\"";
-    private static final String AUTH_FAIL_MESSAGE = "{\"status\":\"fail\"";
+    private static final String PASSWORD = "password";
 
     @Test
     public void noParamAuthenticateShouldReturnFalse() throws Exception {
-
         this.mockMvc.perform(get("/v1/accounts/authenticate")).andDo(print()).andExpect(status().is4xxClientError());
     }
 
     @Test
     public void GoodPasswordAuthenticate() throws Exception {
-        MvcResult result = this.mockMvc.perform(post("/v1/accounts/authenticate")
-                .param("id", "1337")
-                .param("password", "XXXHHHXXX"))
-                    .andDo(print()).andExpect(status().isOk()).andReturn();
-
-        Assert.assertEquals(AUTH_SUCCESS_MESSAGE, result.getResponse().getContentAsString());
+        Account account = TestUtils.createAndPostAccount(PASSWORD, this.mockMvc);
+        Assert.assertTrue(TestUtils.authenticate(account.id, PASSWORD, this.mockMvc));
     }
 
     @Test
     public void BadPasswordAuthenticate() throws Exception {
-        MvcResult result = this.mockMvc.perform(post("/v1/accounts/authenticate")
-                .param("id", "1337")
-                .param("password", "wrongpassword"))
-                .andDo(print()).andExpect(status().isOk()).andReturn();
-
-        Assert.assertEquals(AUTH_FAIL_MESSAGE, result.getResponse().getContentAsString());
+        Account account = TestUtils.createAndPostAccount(PASSWORD, this.mockMvc);
+        Assert.assertFalse(TestUtils.authenticate(account.id, "WrongPassword", this.mockMvc));
     }
 
     @Test
     public void EmptyPasswordAuthenticate() throws Exception {
-        MvcResult result = this.mockMvc.perform(post("/v1/accounts/authenticate")
-                .param("id", "1337")
-                .param("password", ""))
-                .andDo(print()).andExpect(status().isOk()).andReturn();
-
-        Assert.assertEquals(AUTH_FAIL_MESSAGE, result.getResponse().getContentAsString());
+        Account account = TestUtils.createAndPostAccount(PASSWORD, this.mockMvc);
+        Assert.assertFalse(TestUtils.authenticate(account.id, "", this.mockMvc));
     }
 }

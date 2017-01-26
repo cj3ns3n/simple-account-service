@@ -24,11 +24,11 @@ public class AccountController {
     private ObjectMapper jsonMapper = new ObjectMapper();
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    private static final String AUTH_SUCCESS_MESSAGE = "{\"status\":\"success\", \"roles\":\"\"";
-    private static final String AUTH_FAIL_MESSAGE = "{\"status\":\"fail\"";
+    private static final String AUTH_SUCCESS_MESSAGE = "{\"status\":\"success\", \"roles\":\"\"}";
+    private static final String AUTH_FAIL_MESSAGE = "{\"status\":\"fail\"}";
 
-    private static final String CREATE_SUCCESS_MESSAGE = "{\"status\":\"success\", \"accountId:\"%d";
-    private static final String CREATE_FAIL_MESSAGE = "{\"status\":\"fail\"";
+    private static final String CREATE_SUCCESS_MESSAGE = "{\"status\":\"success\", \"accountId\":%d}";
+    private static final String CREATE_FAIL_MESSAGE = "{\"status\":\"fail\"}";
 
     private static final String TEMP_SALT = "Salty";
 
@@ -97,6 +97,9 @@ public class AccountController {
         newAccount.loginName = loginName;
         newAccount.firstName = firstName;
         newAccount.lastName = lastName;
+
+        // TODO Password rules validation
+
         try {
             newAccount.passwordHash = hashPassword(password, TEMP_SALT);
         } catch (Exception e) {

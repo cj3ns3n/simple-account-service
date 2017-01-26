@@ -9,12 +9,11 @@ public class AccessorInMemory {
 
     private static final String ACCOUNT_TABLE = "ACCOUNT";
     private static final String CREATE_ACCOUNT_TABLE = String.format("CREATE TABLE %s " +
-            "(ID INT NOT NULL," +
-            "FIRST_NAME VARCHAR(256) NOT NULL," +
-            "LAST_NAME VARCHAR(256) NOT NULL," +
-            "LOGIN_NAME VARCHAR(256) NOT NULL," +
-            "PASSWORD_HASH VARCHAR(512) NOT NULL," +
-            "PRIMARY KEY (ID))", ACCOUNT_TABLE);
+            "(ID BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1)," +
+            " FIRST_NAME VARCHAR(256) NOT NULL," +
+            " LAST_NAME VARCHAR(256) NOT NULL," +
+            " LOGIN_NAME VARCHAR(256) NOT NULL," +
+            " PASSWORD_HASH VARCHAR(512) NOT NULL)", ACCOUNT_TABLE);
 
     public AccessorInMemory() {
         final String connURL = "jdbc:derby:memory:accounts;create=true";
@@ -44,8 +43,14 @@ public class AccessorInMemory {
         }
 
         Statement createStatement = conn.createStatement();
-        createStatement.execute(CREATE_ACCOUNT_TABLE);
-        createStatement.close();
+        try {
+            createStatement.execute(CREATE_ACCOUNT_TABLE);
+        } catch (Exception ex) {
+            throw ex;
+        }
+        finally {
+            createStatement.close();
+        }
 
         Account tmpAccount = new Account();
         tmpAccount.id = 1337L;
@@ -97,9 +102,8 @@ public class AccessorInMemory {
     }
 
     public long addAccount(Account account) throws SQLException {
-        String insertStmtStr = String.format("INSERT INTO %s (ID, FIRST_NAME, LAST_NAME, LOGIN_NAME, PASSWORD_HASH) VALUES (%d, '%s', '%s', '%s', '%s')",
+        String insertStmtStr = String.format("INSERT INTO %s (FIRST_NAME, LAST_NAME, LOGIN_NAME, PASSWORD_HASH) VALUES ('%s', '%s', '%s', '%s')",
                 ACCOUNT_TABLE,
-                account.id,
                 account.firstName,
                 account.lastName,
                 account.loginName,
@@ -107,19 +111,17 @@ public class AccessorInMemory {
 
         Statement insertStatement = conn.createStatement();
         try {
-            boolean success = insertStatement.execute(insertStmtStr);
-            if (success) {
-                ResultSet keysResult = insertStatement.getGeneratedKeys();
-                if (keysResult.next()) {
-                    return keysResult.getLong(0);
-                }
-                else {
-                    throw new RuntimeException("Failed to read account ID");
-                }
+            insertStatement.execute(insertStmtStr, Statement.RETURN_GENERATED_KEYS);
+
+            ResultSet keysResult = insertStatement.getGeneratedKeys();
+            if (keysResult != null && keysResult.next()) {
+                return keysResult.getLong(1);
             }
             else {
-                throw new RuntimeException("Failed to insert account");
+                throw new RuntimeException("Failed to read account ID");
             }
+        } catch (Exception ex) {
+            throw ex;
         } finally {
             insertStatement.close();
         }
