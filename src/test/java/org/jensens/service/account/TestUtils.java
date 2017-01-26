@@ -2,7 +2,6 @@ package org.jensens.service.account;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jensens.service.account.storage.Account;
-import org.junit.Assert;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
