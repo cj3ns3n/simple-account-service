@@ -60,8 +60,6 @@ public class TestUtils {
                 .param("password", password))
                 .andDo(print()).andExpect(status().isOk()).andReturn();
 
-        String resp = result.getResponse().getContentAsString();
-        //return result.getResponse().getContentAsString().equals(AUTH_SUCCESS_MESSAGE);
-        return resp.equals(AUTH_SUCCESS_MESSAGE);
+        return result.getResponse().getContentAsString().equals(AUTH_SUCCESS_MESSAGE);
     }
 }
