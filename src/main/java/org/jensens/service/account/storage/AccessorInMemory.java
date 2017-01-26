@@ -94,16 +94,16 @@ public class AccessorInMemory {
     }
 
     public long addAccount(Account account) throws SQLException {
-        String insertStmtStr = String.format("INSERT INTO %s (FIRST_NAME, LAST_NAME, LOGIN_NAME, PASSWORD_HASH) VALUES ('%s', '%s', '%s', '%s')",
-                ACCOUNT_TABLE,
-                account.firstName,
-                account.lastName,
-                account.loginName,
-                account.passwordHash);
+        String insertStmtStr = String.format("INSERT INTO %s (FIRST_NAME, LAST_NAME, LOGIN_NAME, PASSWORD_HASH) VALUES (?, ?, ?, ?)",
+                ACCOUNT_TABLE);
+        PreparedStatement insertStatement = conn.prepareStatement(insertStmtStr, Statement.RETURN_GENERATED_KEYS);
+        insertStatement.setString(1, account.firstName);
+        insertStatement.setString(2, account.lastName);
+        insertStatement.setString(3, account.loginName);
+        insertStatement.setString(4, account.passwordHash);
 
-        Statement insertStatement = conn.createStatement();
         try {
-            insertStatement.execute(insertStmtStr, Statement.RETURN_GENERATED_KEYS);
+            insertStatement.executeUpdate();
 
             ResultSet keysResult = insertStatement.getGeneratedKeys();
             if (keysResult != null && keysResult.next()) {
