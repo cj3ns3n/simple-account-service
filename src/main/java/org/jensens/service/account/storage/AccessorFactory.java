@@ -10,7 +10,6 @@ public class AccessorFactory {
         File tempDir = new File(System.getProperty("java.io.tmpdir"));
         File dbFile = new File(tempDir, "Accounts");
         String connURL = String.format("jdbc:derby:%s;create=true", dbFile.getPath());
-        //final String connURL = "jdbc:derby:memory:accounts;create=true";
 
         Connection conn = null;
         try {
@@ -18,7 +17,7 @@ public class AccessorFactory {
         } catch (SQLException e) {
             e.printStackTrace();
 
-            // Filed to make file based DB, use in memory DB.  Just so stuff works.
+            // Failed to make file based DB, use in memory DB.  Just so stuff works.
             connURL = "jdbc:derby:memory:accounts;create=true";
             try {
                 conn = DriverManager.getConnection(connURL);
