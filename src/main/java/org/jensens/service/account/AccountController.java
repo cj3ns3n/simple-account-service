@@ -30,7 +30,7 @@ public class AccountController {
     private static final String CREATE_SUCCESS_MESSAGE = "{\"status\":\"success\", \"accountId\":%d}";
     private static final String CREATE_FAIL_MESSAGE = "{\"status\":\"fail\"}";
 
-    private static final String TEMP_SALT = "Salty";
+    private static final String GLOBAL_SALT = "Salty";
 
     @RequestMapping(value = "v1/accounts/authenticate", method = RequestMethod.POST)
     public ResponseEntity<String> authenticate(@RequestParam(value="id") long accountId, @RequestParam(value="password") String password, HttpServletRequest request) {
@@ -38,7 +38,7 @@ public class AccountController {
             Account account = accessor.getAccount(accountId);
 
             try {
-                if (account.passwordHash.equals(hashPassword(password, TEMP_SALT))) {
+                if (account.passwordHash.equals(hashPassword(password, GLOBAL_SALT))) {
                     return ResponseEntity.ok(AUTH_SUCCESS_MESSAGE);
                 }
                 else {
@@ -101,7 +101,7 @@ public class AccountController {
         // TODO Password rules validation
 
         try {
-            newAccount.passwordHash = hashPassword(password, TEMP_SALT);
+            newAccount.passwordHash = hashPassword(password, GLOBAL_SALT);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
