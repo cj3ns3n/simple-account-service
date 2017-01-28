@@ -2,7 +2,8 @@ package org.jensens.service.account;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.tomcat.util.codec.binary.Base64;
-import org.jensens.service.account.storage.AccessorInMemory;
+import org.jensens.service.account.storage.Accessor;
+import org.jensens.service.account.storage.AccessorFactory;
 import org.jensens.service.account.storage.Account;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +21,7 @@ import java.sql.SQLException;
 
 @RestController
 public class AccountController {
-    private AccessorInMemory accessor = new AccessorInMemory();
+    private Accessor accessor = AccessorFactory.getAccountAccessor();
     private ObjectMapper jsonMapper = new ObjectMapper();
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -30,7 +31,7 @@ public class AccountController {
     private static final String CREATE_SUCCESS_MESSAGE = "{\"status\":\"success\", \"accountId\":%d}";
     private static final String CREATE_FAIL_MESSAGE = "{\"status\":\"fail\"}";
 
-    private static final String TEMP_SALT = "Salty";
+    private static final String GLOBAL_SALT = "Salty";
 
     @RequestMapping(value = "v1/accounts/authenticate", method = RequestMethod.POST)
     public ResponseEntity<String> authenticate(@RequestParam(value="id") long accountId, @RequestParam(value="password") String password, HttpServletRequest request) {
@@ -38,7 +39,7 @@ public class AccountController {
             Account account = accessor.getAccount(accountId);
 
             try {
-                if (account.passwordHash.equals(hashPassword(password, TEMP_SALT))) {
+                if (account.passwordHash.equals(hashPassword(password, GLOBAL_SALT))) {
                     return ResponseEntity.ok(AUTH_SUCCESS_MESSAGE);
                 }
                 else {
@@ -48,7 +49,7 @@ public class AccountController {
                 log.error("Request: " + request.getRequestURL() + " raised " + ex);
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
@@ -101,7 +102,7 @@ public class AccountController {
         // TODO Password rules validation
 
         try {
-            newAccount.passwordHash = hashPassword(password, TEMP_SALT);
+            newAccount.passwordHash = hashPassword(password, GLOBAL_SALT);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);

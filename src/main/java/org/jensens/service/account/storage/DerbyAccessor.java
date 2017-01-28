@@ -4,7 +4,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AccessorInMemory {
+public class DerbyAccessor implements Accessor {
     private Connection conn;
 
     private static final String ACCOUNT_TABLE = "ACCOUNT";
@@ -15,15 +15,9 @@ public class AccessorInMemory {
             " LOGIN_NAME VARCHAR(256) NOT NULL," +
             " PASSWORD_HASH VARCHAR(512) NOT NULL)", ACCOUNT_TABLE);
 
-    public AccessorInMemory() {
-        final String connURL = "jdbc:derby:memory:accounts;create=true";
-
-        try {
-            conn = DriverManager.getConnection(connURL);
-            initAccountTable();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    public DerbyAccessor(Connection conn) throws SQLException {
+        this.conn = conn;
+        initAccountTable();
     }
 
     private void initAccountTable() throws SQLException {
@@ -53,6 +47,7 @@ public class AccessorInMemory {
         }
     }
 
+    @Override
     public Account getAccount(long accountId) throws SQLException {
         String selectStmtStr = String.format("SELECT * FROM %s WHERE ID = %d", ACCOUNT_TABLE, accountId);
         Account account = null;
@@ -67,6 +62,7 @@ public class AccessorInMemory {
         return account;
     }
 
+    @Override
     public List<Account> getAccounts(long limit) throws SQLException {
         String selectStmtStr = String.format("SELECT * FROM %s", ACCOUNT_TABLE);
         List<Account> accounts = new ArrayList<Account>();
@@ -93,6 +89,7 @@ public class AccessorInMemory {
         return account;
     }
 
+    @Override
     public long addAccount(Account account) throws SQLException {
         String insertStmtStr = String.format("INSERT INTO %s (FIRST_NAME, LAST_NAME, LOGIN_NAME, PASSWORD_HASH) VALUES (?, ?, ?, ?)",
                 ACCOUNT_TABLE);
