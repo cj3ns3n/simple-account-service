@@ -14,7 +14,6 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.sql.SQLException;
 import java.util.List;
 
 @Service
@@ -28,7 +27,7 @@ public class AccountService {
         accountAccessor = AccessorFactory.getAccountAccessor();
     }
 
-    public boolean authenticatePassword(long accountId, String password) throws DataAccessException, InvalidKeySpecException, NoSuchAlgorithmException {
+    public boolean authenticatePassword(long accountId, String password) throws DataAccessException, PasswordException {
         Account account = accountAccessor.getAccount(accountId);
         return account.passwordHash.equals(hashPassword(password, GLOBAL_SALT));
     }
@@ -49,7 +48,7 @@ public class AccountService {
         return jsonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(getAccounts(limit));
     }
 
-    public Account createAccount(String loginName, String firstName, String lastName, String password) throws DataAccessException, InvalidKeySpecException, NoSuchAlgorithmException {
+    public Account createAccount(String loginName, String firstName, String lastName, String password) throws DataAccessException, PasswordException {
         Account newAccount = new Account();
         newAccount.loginName = loginName;
         newAccount.firstName = firstName;
@@ -62,14 +61,19 @@ public class AccountService {
         return newAccount;
     }
 
-    private String hashPassword(String password, String salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    private String hashPassword(String password, String salt) throws PasswordException {
         final int iterations = 20*1000;
         final int desiredKeyLen = 256;
 
-        SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-        SecretKey key = f.generateSecret(new PBEKeySpec(
-                password.toCharArray(), salt.getBytes(), iterations, desiredKeyLen)
-        );
+        SecretKey key = null;
+        try {
+            SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+            key = f.generateSecret(new PBEKeySpec(
+                    password.toCharArray(), salt.getBytes(), iterations, desiredKeyLen)
+            );
+        } catch (Exception ex) {
+            throw new PasswordException(ex);
+        }
 
         return Base64.encodeBase64String(key.getEncoded());
     }

@@ -36,8 +36,10 @@ public class AccountController {
         } catch (DataAccessException dax) {
             log.error("Request: " + request.getRequestURL() + " raised " + dax);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Data Access Error");
-        }
-        catch (Exception ex) {
+        } catch (PasswordException px) {
+            log.error("Request: " + request.getRequestURL() + " raised " + px);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Password Processing Error");
+        } catch (Exception ex) {
             log.error("Request: " + request.getRequestURL() + " raised " + ex);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
@@ -57,7 +59,7 @@ public class AccountController {
     }
 
     @RequestMapping(value = "v1/accounts/list", method = RequestMethod.GET)
-    public ResponseEntity<String> listAccount(@RequestParam(value="limit", required=false) String limitStr, HttpServletRequest request) {
+    public ResponseEntity<String> listAccounts(@RequestParam(value="limit", required=false) String limitStr, HttpServletRequest request) {
         long limit = Long.MAX_VALUE;
 
         if (limitStr != null) {
@@ -92,6 +94,9 @@ public class AccountController {
         } catch (DataAccessException dax) {
             log.error("Request: " + request.getRequestURL() + " raised " + dax);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Data Access Error");
+        } catch (PasswordException px) {
+            log.error("Request: " + request.getRequestURL() + " raised " + px);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Password Processing Error");
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.ok(CREATE_FAIL_MESSAGE);
