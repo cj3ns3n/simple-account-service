@@ -1,6 +1,7 @@
 package org.jensens.service.account;
 
 import org.jensens.service.account.storage.Account;
+import org.jensens.service.account.storage.DataAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,50 +27,55 @@ public class AccountController {
     @RequestMapping(value = "v1/accounts/authenticate", method = RequestMethod.POST)
     public ResponseEntity<String> authenticate(@RequestParam(value="id") long accountId, @RequestParam(value="password") String password, HttpServletRequest request) {
         try {
-            try {
-                if (accountService.authenticatePassword(accountId, password)) {
-                    return ResponseEntity.ok(AUTH_SUCCESS_MESSAGE);
-                }
-                else {
-                    return ResponseEntity.ok(AUTH_FAIL_MESSAGE);
-                }
-            } catch (Exception ex) {
-                log.error("Request: " + request.getRequestURL() + " raised " + ex);
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            if (accountService.authenticatePassword(accountId, password)) {
+                return ResponseEntity.ok(AUTH_SUCCESS_MESSAGE);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+            else {
+                return ResponseEntity.ok(AUTH_FAIL_MESSAGE);
+            }
+        } catch (DataAccessException dax) {
+            log.error("Request: " + request.getRequestURL() + " raised " + dax);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Data Access Error");
+        }
+        catch (Exception ex) {
+            log.error("Request: " + request.getRequestURL() + " raised " + ex);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
     @RequestMapping(value = "v1/accounts/{id}", method = RequestMethod.GET)
-    public ResponseEntity<String> getAccount(@PathVariable(value="id") long accountId) {
+    public ResponseEntity<String> getAccount(@PathVariable(value="id") long accountId, HttpServletRequest request) {
         try {
             return ResponseEntity.ok(accountService.getAccountJson(accountId));
+        } catch (DataAccessException dax) {
+            log.error("Request: " + request.getRequestURL() + " raised " + dax);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Data Access Error");
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Request: " + request.getRequestURL() + " raised " + e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
     @RequestMapping(value = "v1/accounts/list", method = RequestMethod.GET)
-    public ResponseEntity<String> listAccount(@RequestParam(value="limit", required=false) String limitStr) {
+    public ResponseEntity<String> listAccount(@RequestParam(value="limit", required=false) String limitStr, HttpServletRequest request) {
         long limit = Long.MAX_VALUE;
 
         if (limitStr != null) {
             try {
                 limit = Long.parseLong(limitStr);
             } catch (NumberFormatException e) {
-                e.printStackTrace();
+                log.error("Request: " + request.getRequestURL() + " raised " + e);
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
             }
         }
         
         try {
             return ResponseEntity.ok(accountService.getAccountsAsJson(limit));
+        } catch (DataAccessException dax) {
+            log.error("Request: " + request.getRequestURL() + " raised " + dax);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Data Access Error");
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Request: " + request.getRequestURL() + " raised " + e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
@@ -78,10 +84,14 @@ public class AccountController {
     public ResponseEntity<String> create(@RequestParam(value="loginName") String loginName,
                           @RequestParam(value="firstName") String firstName,
                           @RequestParam(value="lastName") String lastName,
-                          @RequestParam(value="password") String password) {
+                          @RequestParam(value="password") String password,
+                                                          HttpServletRequest request) {
         try {
             Account newAccount = accountService.createAccount(loginName, firstName, lastName, password);
             return ResponseEntity.ok(String.format(CREATE_SUCCESS_MESSAGE, newAccount.id));
+        } catch (DataAccessException dax) {
+            log.error("Request: " + request.getRequestURL() + " raised " + dax);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Data Access Error");
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.ok(CREATE_FAIL_MESSAGE);

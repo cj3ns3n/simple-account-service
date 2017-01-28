@@ -17,7 +17,7 @@ public class AccessorFactory {
         } catch (SQLException e) {
             e.printStackTrace();
 
-            // Failed to make file based DB, use in memory DB.  Just so stuff works.
+            // Failed to make file based DB, use in memory DB.  Make it work no matter what.
             connURL = "jdbc:derby:memory:accounts;create=true";
             try {
                 conn = DriverManager.getConnection(connURL);
@@ -27,9 +27,9 @@ public class AccessorFactory {
         }
 
         try {
-            return new DerbyAccessor(conn);
-        } catch (SQLException e) {
-            e.printStackTrace();
+            return new SqlAccessor(conn);
+        } catch (DataAccessException dax) {
+            dax.printStackTrace();
             return null;
         }
     }
