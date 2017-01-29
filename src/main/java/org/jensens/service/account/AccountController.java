@@ -93,8 +93,8 @@ public class AccountController {
             log.error("Request: " + request.getRequestURL() + " raised " + px);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Password Processing Error");
         } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.ok(CREATE_FAIL_MESSAGE);
+            log.error("Request: " + request.getRequestURL() + " raised " + e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(CREATE_FAIL_MESSAGE);
         }
     }
 }
