@@ -19,7 +19,7 @@ public class AccountService {
     private ObjectMapper jsonMapper = new ObjectMapper();
     private Accessor accountAccessor;
 
-    private static final String GLOBAL_SALT = "Salty";
+    private static final String GLOBAL_SALT = "Salty";  // TODO Non-global salt
 
     public AccountService() {
         accountAccessor = AccessorFactory.getAccountAccessor();
