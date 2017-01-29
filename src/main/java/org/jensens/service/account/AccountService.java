@@ -31,7 +31,12 @@ public class AccountService {
     }
 
     public Account getAccount(long accountId) throws DataAccessException {
-        return accountAccessor.getAccount(accountId);
+        Account account = accountAccessor.getAccount(accountId);
+        if (account == null) {
+            throw new NotFoundException("Account not found.");
+        }
+
+        return account;
     }
 
     public String getAccountJson(long accountId) throws JsonProcessingException, DataAccessException {

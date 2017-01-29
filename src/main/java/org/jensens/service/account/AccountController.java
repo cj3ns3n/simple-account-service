@@ -48,13 +48,9 @@ public class AccountController {
     @RequestMapping(value = "v1/accounts/{id}", method = RequestMethod.GET)
     public ResponseEntity<String> getAccount(@PathVariable(value="id") long accountId, HttpServletRequest request) {
         try {
-            String account = accountService.getAccountJson(accountId);
-            if (account == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-            }
-            else {
-                return ResponseEntity.ok(account);
-            }
+            return ResponseEntity.ok(accountService.getAccountJson(accountId));
+        } catch (NotFoundException nfx) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         } catch (DataAccessException dax) {
             log.error("Request: " + request.getRequestURL() + " raised " + dax);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Data Access Error");
