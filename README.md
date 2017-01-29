@@ -18,20 +18,19 @@ Java –jar target/simple-account-service-0.1.0.jar
 ## Usage
 The service supports four end points:
 
+# Create
 * **URL**
 /v1/accounts/create
 
-* **Method:**
-  `POST`
+* **Method:** `POST`
     
-    *  **URL Params**
+*  **URL Params**
 
-       **Required:**
-        
-`loginName=[string]`
-`firstName=[string]`
-`lastName=[string]`
-`password=[string]`
+**Required:**
+- `loginName=[string]`
+- `firstName=[string]`
+- `lastName=[string]`
+- `password=[string]`
 
 * **Success Response:**
 
@@ -53,9 +52,9 @@ curl -X POST -F "loginName=david" -F "password=something" –F "firstName=david"
 Currently there are no limits on the input values, so 500 is the only error response.  Later 400 could be a response with content describing the reason for the failure.
 
 ## Future Development
-[ ] Authentication to return a token which can be used later to authenticate the user without requiring the
-[ ] Non-global salt
-[ ] Validation checks on account creation input values (password length, username uniqueness, etc)
-[ ] Admin page
+ - [ ] Authentication to return a token which can be used later to authenticate the user without requiring the
+ - [ ] Non-global salt
+ - [ ] Validation checks on account creation input values (password length, username uniqueness, etc)
+ - [ ] Admin page
 
 
