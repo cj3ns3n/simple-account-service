@@ -38,11 +38,11 @@ public class TestUtils {
                 .param("firstName", account.firstName)
                 .param("lastName", account.lastName)
                 .param("password", password)))
-                .andDo(print()).andExpect(status().isOk()).andReturn();
+                .andDo(print()).andExpect(status().is2xxSuccessful()).andReturn();
 
-        ObjectMapper mapper = new ObjectMapper();
-        Map<String,Object> createRespMap = mapper.readValue(result.getResponse().getContentAsString(), Map.class);
-        return (int)createRespMap.get("accountId");
+        String locationUrl = result.getResponse().getHeader("Location");
+        String idStr = locationUrl.substring(locationUrl.lastIndexOf("/") + 1);
+        return Long.valueOf(idStr);
     }
 
     public static Account getAccount(long accountId, MockMvc mockMvc) throws Exception {

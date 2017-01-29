@@ -5,11 +5,14 @@ import org.jensens.service.account.storage.DataAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.xml.ws.Response;
+import java.net.URI;
 
 @RestController
 public class AccountController {
@@ -23,6 +26,8 @@ public class AccountController {
 
     private static final String CREATE_SUCCESS_MESSAGE = "{\"status\":\"success\", \"accountId\":%d}";
     private static final String CREATE_FAIL_MESSAGE = "{\"status\":\"fail\"}";
+
+    private static final String GET_ACCOUNT_URL_FORMAT = "v1/accounts/{id}";
 
     @RequestMapping(value = "v1/accounts/authenticate", method = RequestMethod.POST)
     public ResponseEntity<String> authenticate(@RequestParam(value="id") long accountId, @RequestParam(value="password") String password, HttpServletRequest request) {
@@ -45,7 +50,7 @@ public class AccountController {
         }
     }
 
-    @RequestMapping(value = "v1/accounts/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = GET_ACCOUNT_URL_FORMAT, method = RequestMethod.GET)
     public ResponseEntity<String> getAccount(@PathVariable(value="id") long accountId, HttpServletRequest request) {
         try {
             return ResponseEntity.ok(accountService.getAccountJson(accountId));
@@ -87,7 +92,17 @@ public class AccountController {
                                                           HttpServletRequest request) {
         try {
             Account newAccount = accountService.createAccount(loginName, firstName, lastName, password);
-            return ResponseEntity.ok(String.format(CREATE_SUCCESS_MESSAGE, newAccount.id));
+
+            // construct the location of the created resource
+            String uri = request.getRequestURI();
+            String url = String.valueOf(request.getRequestURL());
+            String host = url.substring(0, url.indexOf(uri) + 1);
+            String accountResourceUrl = host + GET_ACCOUNT_URL_FORMAT.replace("{id}", String.valueOf(newAccount.id));
+
+            HttpHeaders locationHeaders = new HttpHeaders();
+            locationHeaders.set("Location", accountResourceUrl);
+
+            return ResponseEntity.status(HttpStatus.CREATED).headers(locationHeaders).body(null);
         } catch (DataAccessException dax) {
             log.error("Request: " + request.getRequestURL() + " raised " + dax);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Data Access Error");

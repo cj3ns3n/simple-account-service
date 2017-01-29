@@ -36,20 +36,16 @@ The service supports four end points:
 
 **Success Response:**
 
-***Code:*** 200 <br />
-***Content:*** `{ "status":"success", "acountId":[Integer value for the new accound] }`
+***Code:*** 201 <br />
+***Headers*** `Location,[URL of the created resource]` <br/>
+***Content:*** `{}`
 			   
-**Error Response:**
-
-***Code:*** 404 NOT FOUND<br />
-***Content:*** `{ status:"fail"}`
-
 **Sample Call:**
 
 curl -X POST -F "loginName=david" -F "password=something" –F "firstName=david" -F "lastName=jones" http://localhost:8080/v1/accounts/create
 
 **Notes:**
-Currently there are no limits on the input values, so 500 is the only error response.  Later 400 could be a response with content describing the reason for the failure.
+Currently there are no limits on the input values, so 500 is the only error response.  In later versions, 400 could be a response with content describing the reason for the failure.
 
 ## Get Account
 **URL**
@@ -136,15 +132,17 @@ curl http://localhost:8080/v1/accounts/list
 curl -X POST -F "id=99" -F "password=something" http://localhost:8080/v1/accounts/authenticate
 
 **Notes:**
-Authenticate uses a post method so that the parameters can be encrypted when deployed on a web server with SSL enabled.
+- Authenticate uses a post method so that the parameters can be encrypted when deployed on a web server with SSL enabled.
+- Response body has an unused "roles" field.  This is for planned future capabilities of providing authorization roles.
 
 ## General Notes:
 Internal errors are returned with a session ID that can be used to track down errors within the logs
 
 ## Future Development
- - [ ] Authentication to return a token which can be used later to authenticate the user without requiring the
- - [ ] Non-global salt
- - [ ] Validation checks on account creation input values (password length, username uniqueness, etc)
- - [ ] Admin page
- - [ ] Exception handler controller
+ - Authentication to return a token which can be used later to authenticate the user without requiring the account password.
+ - Authorization roles
+ - Non-global salt
+ - Validation checks on account creation input values (password length, username uniqueness, etc)
+ - Admin page
+ - Exception handler controller
 
