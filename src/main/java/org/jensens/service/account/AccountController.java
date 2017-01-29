@@ -31,7 +31,7 @@ public class AccountController {
                 return ResponseEntity.ok(AUTH_SUCCESS_MESSAGE);
             }
             else {
-                return ResponseEntity.ok(AUTH_FAIL_MESSAGE);
+                return ResponseEntity.badRequest().body(null);
             }
         } catch (DataAccessException dax) {
             log.error("Request: " + request.getRequestURL() + " raised " + dax);

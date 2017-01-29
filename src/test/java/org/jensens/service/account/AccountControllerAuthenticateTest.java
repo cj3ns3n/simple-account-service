@@ -32,18 +32,18 @@ public class AccountControllerAuthenticateTest {
     @Test
     public void GoodPasswordAuthenticate() throws Exception {
         Account account = TestUtils.createAndPostAccount(PASSWORD, this.mockMvc);
-        Assert.assertTrue(TestUtils.authenticate(account.id, PASSWORD, this.mockMvc));
+        TestUtils.authenticateValid(account.id, PASSWORD, this.mockMvc);
     }
 
     @Test
     public void BadPasswordAuthenticate() throws Exception {
         Account account = TestUtils.createAndPostAccount(PASSWORD, this.mockMvc);
-        Assert.assertFalse(TestUtils.authenticate(account.id, "WrongPassword", this.mockMvc));
+        TestUtils.authenticateInvalid(account.id, "WrongPassword", this.mockMvc);
     }
 
     @Test
     public void EmptyPasswordAuthenticate() throws Exception {
         Account account = TestUtils.createAndPostAccount(PASSWORD, this.mockMvc);
-        Assert.assertFalse(TestUtils.authenticate(account.id, "", this.mockMvc));
+        TestUtils.authenticateInvalid(account.id, "", this.mockMvc);
     }
 }

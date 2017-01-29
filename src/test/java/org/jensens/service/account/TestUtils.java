@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jensens.service.account.storage.Account;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.Map;
 
@@ -53,12 +54,18 @@ public class TestUtils {
         return mapper.readValue(result.getResponse().getContentAsString(), Account.class);
     }
 
-    public static boolean authenticate(long accountId, String password, MockMvc mockMvc) throws Exception {
-        MvcResult result = mockMvc.perform(post("/v1/accounts/authenticate")
+    private static ResultActions authenticate(long accountId, String password, MockMvc mockMvc) throws Exception {
+        return mockMvc.perform(post("/v1/accounts/authenticate")
                 .param("id", String.valueOf(accountId))
                 .param("password", password))
-                .andDo(print()).andExpect(status().isOk()).andReturn();
+                .andDo(print());
+    }
 
-        return result.getResponse().getContentAsString().equals(AUTH_SUCCESS_MESSAGE);
+    public static void authenticateValid(long accountId, String password, MockMvc mockMvc) throws Exception {
+        authenticate(accountId, password, mockMvc).andExpect(status().isOk());
+    }
+
+    public static void authenticateInvalid(long accountId, String password, MockMvc mockMvc) throws Exception {
+        authenticate(accountId, password, mockMvc).andExpect(status().is4xxClientError());
     }
 }
