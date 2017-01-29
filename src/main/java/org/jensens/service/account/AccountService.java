@@ -60,7 +60,7 @@ public class AccountService {
     }
 
     private String hashPassword(String password, String salt) throws PasswordException {
-        final int iterations = 20*1000;
+        final int iterations = 133700;
         final int desiredKeyLen = 256;
 
         SecretKey key = null;
