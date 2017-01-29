@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.apache.commons.io.IOUtils;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
@@ -21,7 +22,13 @@ public class CustomErrorController implements ErrorController {
     @RequestMapping(value = "/error")
     public String error(HttpServletRequest request, HttpServletResponse response) {
         RequestAttributes requestAttributes = new ServletRequestAttributes(request);
-        String responseErrorMessage = String.valueOf(request.getAttribute(RequestDispatcher.ERROR_MESSAGE));
+        String responseErrorMessage = "Unknown Error";
+
+        try {
+            responseErrorMessage = IOUtils.toString(request.getReader());
+        } catch (IOException iox) {
+            log.error("Request: " + request.getRequestURL() + " raised " + iox);
+        }
 
         return String.format("Error: %d; Session: %s; %s", response.getStatus(), requestAttributes.getSessionId(), responseErrorMessage);
     }

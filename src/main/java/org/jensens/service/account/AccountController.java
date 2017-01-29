@@ -59,18 +59,13 @@ public class AccountController {
     }
 
     @RequestMapping(value = "v1/accounts/list", method = RequestMethod.GET)
-    public ResponseEntity<String> listAccounts(@RequestParam(value="limit", required=false) String limitStr, HttpServletRequest request) {
+    public ResponseEntity<String> listAccounts(@RequestParam(value="limit", required=false) Long limitValue, HttpServletRequest request) {
         long limit = Long.MAX_VALUE;
 
-        if (limitStr != null) {
-            try {
-                limit = Long.parseLong(limitStr);
-            } catch (NumberFormatException e) {
-                log.error("Request: " + request.getRequestURL() + " raised " + e);
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-            }
+        if (limitValue != null) {
+            limit = limitValue;
         }
-        
+
         try {
             return ResponseEntity.ok(accountService.getAccountsAsJson(limit));
         } catch (DataAccessException dax) {
