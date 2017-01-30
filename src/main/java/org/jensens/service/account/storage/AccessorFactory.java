@@ -10,34 +10,44 @@ import java.sql.SQLException;
 
 public class AccessorFactory {
     public static Accessor getAccountAccessor() {
-        File tempDir = new File(System.getProperty("java.io.tmpdir"));
-        File dbFile = new File(tempDir, "Accounts");
-        String connURL = String.format("jdbc:derby:%s;create=true", dbFile.getPath());
-
-        Connection conn = null;
-        try {
-            conn = DriverManager.getConnection(connURL);
-        } catch (SQLException sx) {
-            Logger log = LoggerFactory.getLogger(AccessorFactory.class);
-            log.error("Could not connect to file DB:" + sx);
-
-
-            // Failed to make file based DB, use in memory DB.  Make it work no matter what.
-            connURL = "jdbc:derby:memory:accounts;create=true";
-            try {
-                conn = DriverManager.getConnection(connURL);
-            } catch (SQLException sx1) {
-                log.error("Could not connect to in memory DB:" + sx1);
-            }
+        Accessor accessor = getFileBasedAccessor();
+        if (accessor == null) {
+            accessor = getMemoryAccessor();  // Failsafe database
         }
 
+        return accessor;
+    }
+
+    public static Accessor getFileBasedAccessor() {
+        File tempDir = new File(System.getProperty("java.io.tmpdir"));
+        File dbFile = new File(tempDir, "Accounts");
+        String connUrl = String.format("jdbc:derby:%s;create=true", dbFile.getPath());
         try {
-            return new SqlAccessor(conn);
-        } catch (DataAccessException dax) {
+            return getAccessorFromConnectionUrl(connUrl);
+        } catch (SQLException|DataAccessException ex) {
             Logger log = LoggerFactory.getLogger(AccessorFactory.class);
-            log.error("Could not instantiate SqlAccesor:" + dax);
+            log.error("Could not instantiate in memory DB:" + ex);
 
             return null;
         }
+    }
+
+    public static Accessor getMemoryAccessor() {
+        try {
+            return getAccessorFromConnectionUrl("jdbc:derby:memory:accounts;create=true");
+        } catch (SQLException|DataAccessException ex) {
+            Logger log = LoggerFactory.getLogger(AccessorFactory.class);
+            log.error("Could not instantiate in memory DB:" + ex);
+
+            return null;
+        }
+    }
+
+    private static Accessor getAccessorFromConnectionUrl(String connUrl) throws SQLException, DataAccessException {
+        File tempDir = new File(System.getProperty("java.io.tmpdir"));
+        File dbFile = new File(tempDir, "Accounts");
+
+        Connection conn = DriverManager.getConnection(connUrl);
+        return new SqlAccessor(conn);
     }
 }
