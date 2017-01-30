@@ -22,15 +22,23 @@ public class AccountService {
     private static final String GLOBAL_SALT = "Salty";  // TODO Non-global salt
 
     public AccountService() {
-        accountAccessor = AccessorFactory.getAccountAccessor();
+        init(AccessorFactory.getAccountAccessor());
     }
 
     public AccountService(Accessor accountAccessor) {
-        this.accountAccessor = accountAccessor;
+        init(accountAccessor);
+    }
+
+    private void init(Accessor accessor) {
+        if (accessor == null) {
+            throw new DataAccessException(new RuntimeException("Null Accessor"));
+        }
+
+        this.accountAccessor = accessor;
     }
 
     public boolean authenticatePassword(long accountId, String password) throws DataAccessException, PasswordException {
-        Account account = accountAccessor.getAccount(accountId);
+        Account account = getAccount(accountId);
         return account.passwordHash.equals(hashPassword(password, GLOBAL_SALT));
     }
 

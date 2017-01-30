@@ -3,6 +3,7 @@ package org.jensens.service.account;
 import org.jensens.service.account.storage.Accessor;
 import org.jensens.service.account.storage.AccessorFactory;
 import org.jensens.service.account.storage.Account;
+import org.jensens.service.account.storage.DataAccessException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,6 +66,14 @@ public class AccountServiceTest {
         Assert.assertEquals(returnedAccount.id, newAccount.id);
     }
 
+    @Test(expected=NotFoundException.class)
+    public void getNonexistantAccountTest() throws Exception {
+        Accessor memAccessor = AccessorFactory.getMemoryAccessor();
+        AccountService service = new AccountService(memAccessor);
+
+        service.getAccount(1337);
+    }
+
     @Test
     public void authenticateTest() throws Exception {
         Accessor memAccessor = AccessorFactory.getMemoryAccessor();
@@ -72,5 +81,19 @@ public class AccountServiceTest {
 
         Account newAccount = service.createAccount(LOGIN_NAME, FIRST_NAME, LAST_NAME, PASSWORD);
         Assert.assertTrue(service.authenticatePassword(newAccount.id, PASSWORD));
+    }
+
+    @Test(expected=NotFoundException.class)
+    public void authenticateNonExistantAccountTest() throws Exception {
+        Accessor memAccessor = AccessorFactory.getMemoryAccessor();
+        AccountService service = new AccountService(memAccessor);
+
+        service.authenticatePassword(42, PASSWORD);
+    }
+
+    @Test(expected = DataAccessException.class)
+    public void nullAccessorTest() {
+        AccountService service = new AccountService(null);
+        service.getAccount(1337);
     }
 }
