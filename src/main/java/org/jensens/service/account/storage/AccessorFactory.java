@@ -1,5 +1,8 @@
 package org.jensens.service.account.storage;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -14,22 +17,26 @@ public class AccessorFactory {
         Connection conn = null;
         try {
             conn = DriverManager.getConnection(connURL);
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (SQLException sx) {
+            Logger log = LoggerFactory.getLogger(AccessorFactory.class);
+            log.error("Could not connect to file DB:" + sx);
+
 
             // Failed to make file based DB, use in memory DB.  Make it work no matter what.
             connURL = "jdbc:derby:memory:accounts;create=true";
             try {
                 conn = DriverManager.getConnection(connURL);
-            } catch (SQLException e1) {
-                e1.printStackTrace();
+            } catch (SQLException sx1) {
+                log.error("Could not connect to in memory DB:" + sx1);
             }
         }
 
         try {
             return new SqlAccessor(conn);
         } catch (DataAccessException dax) {
-            dax.printStackTrace();
+            Logger log = LoggerFactory.getLogger(AccessorFactory.class);
+            log.error("Could not instantiate SqlAccesor:" + dax);
+
             return null;
         }
     }
