@@ -25,6 +25,10 @@ public class AccountService {
         accountAccessor = AccessorFactory.getAccountAccessor();
     }
 
+    public AccountService(Accessor accountAccessor) {
+        this.accountAccessor = accountAccessor;
+    }
+
     public boolean authenticatePassword(long accountId, String password) throws DataAccessException, PasswordException {
         Account account = accountAccessor.getAccount(accountId);
         return account.passwordHash.equals(hashPassword(password, GLOBAL_SALT));
